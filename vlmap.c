@@ -23,11 +23,6 @@ vlnode_destroy(vlnode_t* n) {
 		return;
 	}
 
-	//if(n->key != NULL)
-	//	free(n->key);
-	//if(n->value != NULL)
-	//	free(n->value);
-
 	free(n);
 }
 

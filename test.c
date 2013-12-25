@@ -51,7 +51,7 @@ int main() {
 		printf("`foo' is not present at version %d.\n", 1);
 	}
 
-	//vlmap_destroy(m);
+	vlmap_destroy(m);
 
 	exit(0);
 }
