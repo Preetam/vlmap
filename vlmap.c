@@ -22,7 +22,7 @@ vlnode_t*
 vlmap_real_remove_from_list(vlnode_t* root, vlnode_t* node, int level);
 
 vlnode_t*
-vlmap_search_in_list(vlnode_t* root, vlnode_t* node, int level);
+vlmap_search_in_list(vlnode_t** rootptr, vlnode_t* node, int level);
 
 vlmap*
 vlmap_create() {
@@ -127,23 +127,29 @@ vlmap_vlnode_is_present(vlnode_t* n, uint64_t version) {
 }
 
 vlnode_t*
-vlmap_search_in_list(vlnode_t* root, vlnode_t* node, int level) {
+vlmap_search_in_list(vlnode_t** rootptr, vlnode_t* node, int level) {
+	if(level < 0) {
+		return rootptr[0];
+	}
+
+	vlnode_t* root = rootptr[level];
+
 	if(root == NULL) {
+		return vlmap_search_in_list(rootptr, node, level-1);
+	}
+
+	// node is smaller than root
+	if(vlmap_compare_nodes(node, root) < 0) {
 		return NULL;
 	}
 
-	if(vlmap_compare_nodes(node, root) == 0) {
-		if(vlmap_vlnode_is_present(root, node->created)) {
-			return root;
-		}
-		return NULL;
+	// node is bigger than root, but smaller than
+	// root's next
+	if(vlmap_compare_nodes(node, root->next[level]) < 0) {
+		return vlmap_search_in_list(rootptr, node, level-1);
 	}
 
-	if(vlmap_compare_nodes(node, root->next[level]) < 0 && level != 0) {
-		return vlmap_search_in_list(root, node, level-1);
-	}
-
-	return vlmap_search_in_list(root->next[level], node, level);
+	return vlmap_search_in_list(root->next, node, level);
 }
 
 vlnode_t*
@@ -186,17 +192,17 @@ vlmap_remove(vlmap* m, uint64_t version, uint8_t* key, int keylength) {
 	if(version >= m->version) {
 		vlnode_t* node = vlmap_create_node(version, key, keylength, NULL, 0);
 		int level = m->levels-1;
-		vlnode_t* searched = vlmap_search_in_list(m->root[level], node, level);
-		while(searched == NULL) {
-			if(level == 0) {
-				vlnode_destroy(node);
-				return 1;
-			}
-			level--;
-			searched = vlmap_search_in_list(m->root[level], node, level);
+		vlnode_t* searched = vlmap_search_in_list(m->root, node, level);
+		if(vlmap_compare_nodes(searched, node) == 0) {
+			searched->removed = version;
+			printf("match\n");
+			print_node(searched);
+			printf("removed at %lu, version %lu\n", searched->removed, version);
+		} else {
+			printf("Didn't match\n");
+			print_node(searched);
 		}
 		vlnode_destroy(node);
-		searched->removed = version;
 		return 0;
 	}
 
@@ -208,21 +214,27 @@ vlmap_get(vlmap* m, uint64_t version, uint8_t* key, int keylength, uint8_t** val
 	vlnode_t* node = vlmap_create_node(version, key, keylength, NULL, 0);
 
 	int level = m->levels-1;
-	vlnode_t* searched = vlmap_search_in_list(m->root[level], node, level);
-	while(searched == NULL) {
-		if(level == 0) {
-			vlnode_destroy(node);
-			return 1;
-		}
-		level--;
-		searched = vlmap_search_in_list(m->root[level], node, level);
+	vlnode_t* searched = vlmap_search_in_list(m->root, node, level);
+	
+	if(vlmap_compare_nodes(node, searched) != 0) {
+		vlnode_destroy(node);
+		return 1;
 	}
 
-	*valuelength = searched->valuelength;
-	*value = calloc(*valuelength, sizeof(uint8_t));
-	memcpy(*value, searched->value, *valuelength);
+	while(vlmap_compare_nodes(node, searched) == 0) {
+		if(!vlmap_vlnode_is_present(searched, version)) {
+			searched = searched->next[0];
+		} else {
+			// is present at version
+			*valuelength = searched->valuelength;
+			*value = calloc(*valuelength, sizeof(uint8_t));
+			memcpy(*value, searched->value, *valuelength);
+			vlnode_destroy(node);
+			return 0;
+		}
+	}
 	vlnode_destroy(node);
-	return 0;
+	return 1;
 }
 
 uint64_t
