@@ -13,9 +13,8 @@ int main() {
 
 	printf("Inserting `foo'\n");
 
-	// set "foo" => "bar" at version 0.
 	vlmap_insert(m, vlmap_version(m), key, keylength, val, vallength);
-	
+
 	uint8_t* key1 = "a";
 	uint8_t* key2 = "d";
 	uint8_t* key3 = "b";
@@ -50,7 +49,7 @@ int main() {
 	if(!err) {
 		printf("foo => %.*s at version %d.\n", valuelength, value, (int)vlmap_version(m));
 	} else {
-		printf("`foo' is not present at version %d.\n", 0);
+		printf("`foo' is not present at version %d.\n", (int)vlmap_version(m));
 	}
 
 	err = vlmap_get(m, 0, key, keylength, &value, &valuelength);
@@ -66,14 +65,16 @@ int main() {
 	if(!err) {
 		printf("foo => %.*s at version %d.\n", valuelength, value, 1);
 	} else {
-		printf("`foo' is not present at version %d.\n", 0);
+		printf("`foo' is not present at version %d.\n", 1);
 	}
+
+	free(value);
 
 	vlmap_print(m, 0);
 	vlmap_print(m, 1);
 	vlmap_print(m, 2);
 
-	//vlmap_destroy(m);
+	vlmap_destroy(m);
 
 	exit(0);
 }
