@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #ifndef VLMAP_H
 #define VLMAP_H
@@ -14,14 +15,17 @@ struct vlmap_node {
 	uint64_t created;
 	uint64_t removed;
 
-	struct vlmap_node* next;
+	int level;
+
+	struct vlmap_node** next;
 };
 
 typedef struct vlmap_node vlnode_t;
 
 typedef struct {
 	uint64_t version;
-	vlnode_t* root;
+	int levels;
+	vlnode_t** root;
 } vlmap;
 
 vlmap*
@@ -44,5 +48,8 @@ vlmap_version(vlmap* m);
 
 void
 vlmap_version_increment(vlmap* m);
+
+void
+vlmap_print(vlmap* m, int version);
 
 #endif
