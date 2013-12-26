@@ -43,11 +43,16 @@ int main() {
 
 	//vlmap_print(m);
 
+	//vlmap_print(m, 0);
+	//vlmap_print(m, 1);
+	//vlmap_print(m, 2);
+
 	// Get "foo" at version 2 -- this should be an error.
 	int err = vlmap_get(m, vlmap_version(m), key, keylength, &value, &valuelength);
 
 	if(!err) {
 		printf("foo => %.*s at version %d.\n", valuelength, value, (int)vlmap_version(m));
+		free(value);
 	} else {
 		printf("`foo' is not present at version %d.\n", (int)vlmap_version(m));
 	}
@@ -56,6 +61,7 @@ int main() {
 
 	if(!err) {
 		printf("foo => %.*s at version %d.\n", valuelength, value, 0);
+		free(value);
 	} else {
 		printf("`foo' is not present at version %d.\n", 0);
 	}
@@ -64,15 +70,10 @@ int main() {
 
 	if(!err) {
 		printf("foo => %.*s at version %d.\n", valuelength, value, 1);
+		free(value);
 	} else {
 		printf("`foo' is not present at version %d.\n", 1);
 	}
-
-	free(value);
-
-	vlmap_print(m, 0);
-	vlmap_print(m, 1);
-	vlmap_print(m, 2);
 
 	vlmap_destroy(m);
 
