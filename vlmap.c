@@ -278,3 +278,77 @@ vlmap_print(vlmap* m, int version) {
 		}
 	}
 }
+
+
+vlmap_iterator*
+vlmap_create_iterator(vlmap* m, uint64_t version, uint8_t* startkey, int startkeylen, uint8_t* endkey, int endkeylen) {
+	vlmap_iterator* i = (vlmap_iterator*)calloc(1, sizeof(vlmap_iterator));
+	i->version = version;
+	i->startkey = startkey;
+	i->startkeylen = startkeylen;
+	i->endkey = endkey;
+	i->endkeylen = endkeylen;
+
+	vlnode_t* node = vlmap_create_node(version, startkey, startkeylen, NULL, 0);
+	vlnode_t* searched = vlmap_search_in_list(m->root, node, m->levels-1);
+	if(vlmap_compare_nodes(node, m->root[0]) == 0) {
+		i->root = m->root[0];
+		vlnode_destroy(node);
+		return i;
+	}
+
+	if(searched == NULL) {
+		i->root = m->root[0];
+		vlnode_destroy(node);
+		return i;
+	}
+
+	i->root = searched;
+	if(i->root == NULL) {
+		vlmap_iterator_destroy(i);
+		vlnode_destroy(node);
+		return NULL;
+	}
+
+	vlnode_destroy(node);
+	return i;
+}
+
+void
+vlmap_iterator_destroy(vlmap_iterator* i) {
+	free(i);
+}
+
+int
+vlmap_iterator_get_value(vlmap_iterator* i, uint8_t** value, int* valuelength) {
+	if(i->root != NULL) {
+		*valuelength = i->root->valuelength;
+		*value = calloc(*valuelength, sizeof(uint8_t));
+		memcpy(*value, i->root->value, *valuelength);
+		return 0;
+	}
+	return 1;
+}
+
+vlmap_iterator*
+vlmap_iterator_next(vlmap_iterator* i) {
+	vlnode_t* cur = i->root;
+
+	cur = cur->next[0];
+	while(cur) {
+		if(vlmap_vlnode_is_present(cur, i->version))
+			break;
+		cur = cur->next[0];
+	}
+
+	vlnode_t* node = vlmap_create_node(i->version, i->endkey, i->endkeylen, NULL, 0);
+	if(vlmap_compare_nodes(node, cur) < 0) {
+		//vlmap_iterator_destroy(i);
+		vlnode_destroy(node);
+		return NULL;
+	}
+	vlnode_destroy(node);
+	i->root = cur;
+
+	return i;
+}

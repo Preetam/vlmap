@@ -75,6 +75,18 @@ int main() {
 		printf("`foo' is not present at version %d.\n", 1);
 	}
 
+	vlmap_iterator* i = vlmap_create_iterator(m, 1, "\x00", 1, "\xff", 1);
+
+	do {
+		if(i != NULL)
+			print_node(i->root);
+		else
+			break;
+	} while(vlmap_iterator_next(i));
+
+	if(i != NULL)
+		vlmap_iterator_destroy(i);
+
 	vlmap_destroy(m);
 
 	exit(0);
