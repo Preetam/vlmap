@@ -4,9 +4,12 @@ int
 random_level() {
 	int i;
 	int j = 0;
-	for(i = 0; i < 5; i++)
-		if(rand()%4 == 0)
+	for(i = 0; i < 32; i++)
+		if(rand()%2) {
 			j++;
+		} else {
+			break;
+		}
 	return j;
 }
 
@@ -24,7 +27,7 @@ vlmap_search_in_list(vlnode_t* root, vlnode_t* node, int level);
 vlmap*
 vlmap_create() {
 	vlmap* m = (vlmap*)calloc(1, sizeof(vlmap));
-	m->levels = 5;
+	m->levels = 32;
 	m->root = (vlnode_t**)calloc(m->levels, sizeof(vlnode_t*));
 }
 
@@ -87,29 +90,34 @@ vlmap_node_less_than(vlnode_t* a, vlnode_t* b) {
 	return vlmap_compare_nodes(a, b) < 0;
 }
 
-vlnode_t*
-vlmap_insert_into_list(vlnode_t* root, vlnode_t* node, int level) {
+void
+vlmap_insert_into_list(vlnode_t** rootptr, vlnode_t* node, int level) {
+	if(level < 0) return;
+	vlnode_t* root = rootptr[level];
+
 	if(root == NULL) {
-		return node;
+		if(node->level >= level)
+			rootptr[level] = node;
+		return vlmap_insert_into_list(rootptr, node, level-1);
 	}
 
-	// This is strictly less than
-	if(vlmap_node_less_than(node, root)) {
-		node->next[level] = root;
-		return node;
+	if(vlmap_compare_nodes(node, root) < 0) {
+		if(node->level >= level) {
+			node->next[level] = rootptr[level];
+			rootptr[level] = node;
+		}
+		return vlmap_insert_into_list(rootptr, node, level-1);
 	}
 
-	// The key already exists, so logically remove
-	// the old node and insert the new node in
-	// front of it.
-	if(vlmap_compare_nodes(node, root) == 0) {
-		root->removed = node->created;
-		node->next[level] = root;
-		return node;
+	if(vlmap_compare_nodes(node, root->next[level]) < 0) {
+		if(node->level >= level) {
+			node->next[level] = root->next[level];
+			root->next[level] = node;
+		}
+		return vlmap_insert_into_list(rootptr, node, level-1);
 	}
 
-	root->next[level] = vlmap_insert_into_list(root->next[level], node, level);
-	return root;
+	return vlmap_insert_into_list(root->next, node, level);
 }
 
 int
@@ -164,10 +172,7 @@ vlmap_insert(vlmap* m, uint64_t version, uint8_t* key, int keylength, uint8_t* v
 	if(version >= m->version) {
 		vlnode_t* node = vlmap_create_node(version, key, keylength, value, valuelength);
 
-		int i;
-		for(i = 0; i <= node->level; i++) {
-			m->root[i] = vlmap_insert_into_list(m->root[i], node, i);
-		}
+		vlmap_insert_into_list(m->root, node, m->levels-1);
 
 		return 0;
 	}

@@ -49,4 +49,7 @@ vlmap_version(vlmap* m);
 void
 vlmap_version_increment(vlmap* m);
 
+void
+vlmap_print(vlmap* m, int version);
+
 #endif
