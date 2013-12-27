@@ -29,13 +29,13 @@ int main() {
 
 	printf("Incrementing version\n");
 
-	// version is now at 1.
+	// version is now at 2.
 	vlmap_version_increment(m);
 
-	// Remove "foo" at version 1.
+	// Remove "foo" at version 2.
 	vlmap_remove(m, vlmap_version(m), key, strlen(key));
 
-	// version is now at 2.
+	// version is now at 3.
 	vlmap_version_increment(m);
 
 	uint8_t* value;
@@ -43,7 +43,7 @@ int main() {
 
 	//vlmap_print(m);
 
-	// Get "foo" at version 2 -- this should be an error.
+	// Get "foo" at version 3 -- this should be an error.
 	int err = vlmap_get(m, vlmap_version(m), key, keylength, &value, &valuelength);
 
 	if(!err) {
@@ -53,22 +53,22 @@ int main() {
 		printf("`foo' is not present at version %d.\n", (int)vlmap_version(m));
 	}
 
-	err = vlmap_get(m, 0, key, keylength, &value, &valuelength);
-
-	if(!err) {
-		printf("foo => %.*s at version %d.\n", valuelength, value, 0);
-		free(value);
-	} else {
-		printf("`foo' is not present at version %d.\n", 0);
-	}
-
 	err = vlmap_get(m, 1, key, keylength, &value, &valuelength);
 
 	if(!err) {
 		printf("foo => %.*s at version %d.\n", valuelength, value, 1);
 		free(value);
 	} else {
-		printf("`foo' is not present at version %d.\n", 1);
+		printf("`foo' is not present at version %d.\n", 0);
+	}
+
+	err = vlmap_get(m, 2, key, keylength, &value, &valuelength);
+
+	if(!err) {
+		printf("foo => %.*s at version %d.\n", valuelength, value, 2);
+		free(value);
+	} else {
+		printf("`foo' is not present at version %d.\n", 2);
 	}
 
 	vlmap_iterator* i = vlmap_create_iterator(m, 1, "\x00", 1, "\xff", 1);

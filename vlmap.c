@@ -31,6 +31,7 @@ vlmap_create() {
 	m->levels = 32;
 	m->root = (vlnode_t**)calloc(m->levels, sizeof(vlnode_t*));
 	m->version = 1;
+	return m;
 }
 
 void

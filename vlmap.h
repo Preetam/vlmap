@@ -38,7 +38,6 @@ typedef struct {
 	int endkeylen;
 } vlmap_iterator;
 
-
 // vlmap_create returns a pointer to a new vlmap.
 vlmap*
 vlmap_create();
