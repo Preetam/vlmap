@@ -310,7 +310,7 @@ vlmap_print(vlmap* m, int version) {
 
 
 vlmap_iterator*
-vlmap_create_iterator(vlmap* m, uint64_t version, uint8_t* startkey, int startkeylen, uint8_t* endkey, int endkeylen) {
+vlmap_iterator_create(vlmap* m, uint64_t version, uint8_t* startkey, int startkeylen, uint8_t* endkey, int endkeylen) {
 	vlmap_iterator* i = (vlmap_iterator*)calloc(1, sizeof(vlmap_iterator));
 	i->version = version;
 	i->startkey = startkey;
@@ -322,12 +322,22 @@ vlmap_create_iterator(vlmap* m, uint64_t version, uint8_t* startkey, int startke
 	vlnode_t* searched = vlmap_search_in_list(m->root, node, m->levels-1);
 	if(vlmap_compare_nodes(node, m->root[0]) == 0) {
 		i->root = m->root[0];
+		while(i->root) {
+			if(vlmap_vlnode_is_present(i->root, i->version))
+				break;
+			i->root = i->root->next[0];
+		}
 		vlnode_destroy(node);
 		return i;
 	}
 
 	if(searched == NULL) {
 		i->root = m->root[0];
+		while(i->root) {
+			if(vlmap_vlnode_is_present(i->root, i->version))
+				break;
+			i->root = i->root->next[0];
+		}
 		vlnode_destroy(node);
 		return i;
 	}
@@ -339,6 +349,11 @@ vlmap_create_iterator(vlmap* m, uint64_t version, uint8_t* startkey, int startke
 		return NULL;
 	}
 
+	while(i->root) {
+		if(vlmap_vlnode_is_present(i->root, i->version))
+			break;
+		i->root = i->root->next[0];
+	}
 	vlnode_destroy(node);
 	return i;
 }
@@ -346,6 +361,17 @@ vlmap_create_iterator(vlmap* m, uint64_t version, uint8_t* startkey, int startke
 void
 vlmap_iterator_destroy(vlmap_iterator* i) {
 	free(i);
+}
+
+int
+vlmap_iterator_get_key(vlmap_iterator* i, uint8_t** key, int* keylength) {
+	if(i->root != NULL) {
+		*keylength = i->root->keylength;
+		*key = calloc(*keylength, sizeof(uint8_t));
+		memcpy(*key, i->root->key, *keylength);
+		return 0;
+	}
+	return 1;
 }
 
 int

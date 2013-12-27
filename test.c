@@ -71,7 +71,7 @@ int main() {
 		printf("`foo' is not present at version %d.\n", 2);
 	}
 
-	vlmap_iterator* i = vlmap_create_iterator(m, 1, "\x00", 1, "\xff", 1);
+	vlmap_iterator* i = vlmap_iterator_create(m, 1, "\x00", 1, "\xff", 1);
 
 	do {
 		if(i != NULL)

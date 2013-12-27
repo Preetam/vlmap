@@ -99,6 +99,13 @@ vlmap_iterator_create(vlmap* m, uint64_t version,
 void
 vlmap_iterator_destroy(vlmap_iterator* i);
 
+// vlmap_iterator_get_key returns the key of the current
+// location of the iterator.
+// This returns 0 on success, and key must be freed by
+// the caller.
+int
+vlmap_iterator_get_key(vlmap_iterator* i, uint8_t** key, int* keylength);
+
 // vlmap_iterator_get_value works the same way as calling
 // vlmap_get on the current node of the iterator.
 // This returns 0 on success, and value must be freed by
