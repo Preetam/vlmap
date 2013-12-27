@@ -53,6 +53,8 @@ vlmap_version(vlmap* m);
 void
 vlmap_version_increment(vlmap* m);
 
+// vlmap_prints a map, along with its skip list levels,
+// at a certain version. This is useful for debugging.
 void
 vlmap_print(vlmap* m, int version);
 
@@ -68,6 +70,13 @@ vlmap_clean(vlmap* m, uint64_t version);
 // A start key and an end key are required, but one can
 // use `\x00' and `\xff' as the start and end, respectively,
 // to essentially read from the entire range.
+//
+//             [startkey, endkey)
+// The start key is inclusive, but the end key
+// is exclusive. Getting a range from `a' to `f' will
+// not include a key matching `f'.
+// Appending a `\xff' to the end key should give
+// the range [startkey, endkey].
 vlmap_iterator*
 vlmap_iterator_create(vlmap* m, uint64_t version,
 	uint8_t* startkey, int startkeylen,
@@ -87,7 +96,7 @@ vlmap_iterator_get_key(vlmap_iterator* i, uint8_t** key, int* keylength);
 
 // vlmap_iterator_get_value works the same way as calling
 // vlmap_get on the current node of the iterator.
-// This returns 0 on success, and value must be freed by
+// This returns 0 on success, and key must be freed by
 // the caller.
 int
 vlmap_iterator_get_value(vlmap_iterator* i, uint8_t** value, int* valuelength);

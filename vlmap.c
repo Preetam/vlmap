@@ -4,7 +4,7 @@ int
 random_level() {
 	int i;
 	int j = 0;
-	for(i = 0; i < 32; i++)
+	for(i = 0; i < 20; i++)
 		if(rand()%2) {
 			j++;
 		} else {
@@ -30,7 +30,7 @@ vlmap_search_in_list(vlnode_t** rootptr, vlnode_t* node, int level);
 vlmap*
 vlmap_create() {
 	vlmap* m = (vlmap*)calloc(1, sizeof(vlmap));
-	m->levels = 32;
+	m->levels = 20;
 	m->root = (vlnode_t**)calloc(m->levels, sizeof(vlnode_t*));
 	m->version = 1;
 	return m;
@@ -413,7 +413,7 @@ vlmap_iterator_next(vlmap_iterator* i) {
 	}
 
 	vlnode_t* node = vlmap_create_node(i->version, i->endkey, i->endkeylen, NULL, 0);
-	if(vlmap_compare_nodes(node, cur) < 0) {
+	if(vlmap_compare_nodes(node, cur) <= 0) {
 		vlnode_destroy(node);
 		return NULL;
 	}

@@ -222,4 +222,13 @@ func main() {
 	if r := m.GetRange(4, "\x00", "\xff"); fmt.Sprint(r) != "[]" {
 		log.Fatalf("Expected range %v, got %v.", "[]", r)
 	}
+	if r := m.GetRange(3, "\x00", "f"); fmt.Sprint(r) != "[a b d]" {
+		log.Fatalf("Expected range %v, got %v.", "[a b d]", r)
+	}
+	if r := m.GetRange(3, "f", "f"); fmt.Sprint(r) != "[f]" {
+		log.Fatalf("Expected range %v, got %v.", "[f]", r)
+	}
+	if r := m.GetRange(3, "\x00", "f\xff"); fmt.Sprint(r) != "[a b d f]" {
+		log.Fatalf("Expected range %v, got %v.", "[a b d f]", r)
+	}
 }
