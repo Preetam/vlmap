@@ -35,6 +35,8 @@ vlmap_create() {
 
 void
 vlmap_destroy(vlmap* m) {
+	if(m == NULL) return;
+
 	int j;
 	for(j = 0; j <= m->version; j++) {
 		int i;
@@ -54,9 +56,8 @@ vlmap_destroy(vlmap* m) {
 
 void
 vlnode_destroy(vlnode_t* n) {
-	if(n == NULL) {
-		return;
-	}
+	if(n == NULL) return;
+
 	free(n->next);
 	free(n);
 }
