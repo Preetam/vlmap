@@ -16,4 +16,4 @@
 *.exe
 *.out
 *.app
-test
+valgrind_test

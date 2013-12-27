@@ -2,7 +2,7 @@ clean:
 	rm test
 
 test:
-	gcc -o test -g vlmap.c test.c
+	gcc -o valgrind_test -g vlmap.c test.c
 	./run_valgrind.sh
 
 install:
