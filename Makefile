@@ -5,4 +5,8 @@ test:
 	gcc -o test -g vlmap.c test.c
 	./run_valgrind.sh
 
+install:
+	cp vlmap.h /usr/include/
+	gcc -shared -fPIC vlmap.c -o /usr/lib/libvlmap.so
+
 .PHONY: clean test
