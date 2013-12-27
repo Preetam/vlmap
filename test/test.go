@@ -112,7 +112,4 @@ func main() {
 	if val, ok := m.Get("b", 3); val != "b" || !ok {
 		log.Fatalf("Expected `b' => `%v', got `%v'. Okay: %v", "b", val, ok)
 	}
-	if val, ok := m.Get("b", 3); val != "b" || !ok {
-		log.Fatalf("Expected `b' => `%v', got `%v'. Okay: %v", "b", val, ok)
-	}
 }

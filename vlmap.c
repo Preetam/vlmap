@@ -17,6 +17,8 @@ void
 print_node(vlnode_t* n) {
 	if(n != NULL)
 		printf("[%.*s => %.*s] ", n->keylength, n->key, n->valuelength, n->value);
+	else
+		printf("NULL node\n");
 }
 
 vlnode_t*
@@ -151,7 +153,9 @@ vlmap_search_in_list(vlnode_t** rootptr, vlnode_t* node, int level) {
 
 	// node is smaller than root
 	if(vlmap_compare_nodes(node, root) < 0) {
-		return NULL;
+		if(level == 0)
+			return NULL;
+		return vlmap_search_in_list(rootptr, node, level-1);
 	}
 
 	// node is bigger than root, but smaller than
@@ -268,6 +272,7 @@ vlmap_get(vlmap* m, uint64_t version, uint8_t* key, int keylength, uint8_t** val
 
 	while(vlmap_compare_nodes(node, searched) == 0) {
 		if(!vlmap_vlnode_is_present(searched, version)) {
+
 			searched = searched->next[0];
 		} else {
 			*valuelength = searched->valuelength;
