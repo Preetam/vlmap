@@ -121,4 +121,9 @@ vlmap_iterator_get_value(vlmap_iterator* i, uint8_t** value, int* valuelength);
 vlmap_iterator*
 vlmap_iterator_next(vlmap_iterator* i);
 
+// vlmap_iterator_remove removes the current node in the
+// map and moves to the next node.
+vlmap_iterator*
+vlmap_iterator_remove(vlmap_iterator* i);
+
 #endif

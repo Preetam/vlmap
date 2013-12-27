@@ -128,6 +128,24 @@ func (m *Map) GetRange(version uint64, start string, end string) []string {
 	return ret
 }
 
+func (m *Map) ClearRange(version uint64, start string, end string) {
+	i := m.NewMapIterator(version, start, end)
+	for i.iter != nil {
+		if _, ok := i.Key(); ok {
+			next := C.vlmap_iterator_remove(i.iter)
+			if uintptr(unsafe.Pointer(next)) == 0 {
+				C.vlmap_iterator_destroy(i.iter)
+				i.iter = nil
+			}
+		}
+	}
+}
+
+func (i *MapIterator) Destroy() {
+	C.vlmap_iterator_destroy(i.iter)
+	i.iter = nil
+}
+
 func main() {
 	m := NewVlmap()
 	if version := m.Version(); version != 1 {
@@ -195,5 +213,13 @@ func main() {
 	}
 	if r := m.GetRange(4, "\x00", "\xff"); fmt.Sprint(r) != "[b d f]" {
 		log.Fatalf("Expected range %v, got %v.", "[b d f]", r)
+	}
+
+	m.ClearRange(4, "\x00", "\xff")
+	if r := m.GetRange(3, "\x00", "\xff"); fmt.Sprint(r) != "[a b d f]" {
+		log.Fatalf("Expected range %v, got %v.", "[a b d f]", r)
+	}
+	if r := m.GetRange(4, "\x00", "\xff"); fmt.Sprint(r) != "[]" {
+		log.Fatalf("Expected range %v, got %v.", "[]", r)
 	}
 }
