@@ -35,14 +35,6 @@ vlmap_create() {
 
 void
 vlmap_destroy(vlmap* m) {
-	/*
-	int i;
-	for(i = m->levels-1; i >= 0; i--) {
-		while(m->root[i]) {
-			m->root[i] = vlmap_real_remove_from_list(m->root[i], m->root[i], i);
-		}
-	}
-	*/
 	int j;
 	for(j = 0; j <= m->version; j++) {
 		int i;
@@ -55,6 +47,7 @@ vlmap_destroy(vlmap* m) {
 			}
 		}
 	}
+
 	free(m->root);
 	free(m);
 }
@@ -375,7 +368,6 @@ vlmap_iterator_next(vlmap_iterator* i) {
 
 	vlnode_t* node = vlmap_create_node(i->version, i->endkey, i->endkeylen, NULL, 0);
 	if(vlmap_compare_nodes(node, cur) < 0) {
-		//vlmap_iterator_destroy(i);
 		vlnode_destroy(node);
 		return NULL;
 	}
