@@ -15,7 +15,8 @@ random_level() {
 
 void
 print_node(vlnode_t* n) {
-	printf("[%.*s => %.*s] ", n->keylength, n->key, n->valuelength, n->value);
+	if(n != NULL)
+		printf("[%.*s => %.*s] ", n->keylength, n->key, n->valuelength, n->value);
 }
 
 vlnode_t*
@@ -34,10 +35,24 @@ vlmap_create() {
 
 void
 vlmap_destroy(vlmap* m) {
+	/*
 	int i;
 	for(i = m->levels-1; i >= 0; i--) {
 		while(m->root[i]) {
 			m->root[i] = vlmap_real_remove_from_list(m->root[i], m->root[i], i);
+		}
+	}
+	*/
+	int j;
+	for(j = 0; j <= m->version; j++) {
+		int i;
+		for(i = m->levels-1; i >= 0; i--) {
+			vlnode_t* cur = m->root[i];
+			while(cur) {
+				vlnode_t* next = cur->next[i];
+				m->root[i] = vlmap_real_remove_from_list(m->root[i], cur, i);
+				cur = next;
+			}
 		}
 	}
 	free(m->root);
@@ -172,6 +187,23 @@ vlmap_real_remove_from_list(vlnode_t* root, vlnode_t* node, int level) {
 
 	root->next[level] = vlmap_real_remove_from_list(root->next[level], node, level);
 	return root;
+}
+
+void
+vlmap_clean(vlmap* m, uint64_t version) {
+	int i;
+	for(i = m->levels-1; i >= 0; i--) {
+		vlnode_t* cur = m->root[i];
+		while(cur) {
+			vlnode_t* next = cur->next[i];
+			if(cur->removed > 0 && cur->removed < version) {
+				m->root[i] = vlmap_real_remove_from_list(m->root[i], cur, i);
+			}
+			cur = next;
+		}
+	}
+
+	m->oldest = version;
 }
 
 int

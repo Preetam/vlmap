@@ -24,6 +24,7 @@ typedef struct vlmap_node vlnode_t;
 
 typedef struct {
 	uint64_t version;
+	uint64_t oldest;
 	int levels;
 	vlnode_t** root;
 } vlmap;
@@ -60,6 +61,9 @@ vlmap_version_increment(vlmap* m);
 
 void
 vlmap_print(vlmap* m, int version);
+
+void
+vlmap_clean(vlmap* m, uint64_t version);
 
 vlmap_iterator*
 vlmap_iterator_create(vlmap* m, uint64_t version, uint8_t* startkey, int startkeylen, uint8_t* endkey, int endkeylen);

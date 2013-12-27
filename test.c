@@ -43,10 +43,6 @@ int main() {
 
 	//vlmap_print(m);
 
-	//vlmap_print(m, 0);
-	//vlmap_print(m, 1);
-	//vlmap_print(m, 2);
-
 	// Get "foo" at version 2 -- this should be an error.
 	int err = vlmap_get(m, vlmap_version(m), key, keylength, &value, &valuelength);
 
@@ -86,6 +82,10 @@ int main() {
 
 	if(i != NULL)
 		vlmap_iterator_destroy(i);
+
+	//vlmap_print(m, 1);
+	//vlmap_clean(m, 3);
+	//vlmap_print(m, 1);
 
 	vlmap_destroy(m);
 
