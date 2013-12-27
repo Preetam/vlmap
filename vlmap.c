@@ -163,7 +163,6 @@ vlmap_search_in_list(vlnode_t** rootptr, vlnode_t* node, int level) {
 	if(vlmap_compare_nodes(node, root->next[level]) < 0) {
 		return vlmap_search_in_list(rootptr, node, level-1);
 	}
-
 	return vlmap_search_in_list(root->next, node, level);
 }
 
@@ -253,7 +252,6 @@ vlmap_remove(vlmap* m, uint64_t version, uint8_t* key, int keylength) {
 int
 vlmap_get(vlmap* m, uint64_t version, uint8_t* key, int keylength, uint8_t** value, int* valuelength) {
 	vlnode_t* node = vlmap_create_node(version, key, keylength, NULL, 0);
-
 	int level = m->levels-1;
 	vlnode_t* searched = NULL;
 	if(vlmap_compare_nodes(node, m->root[0]) == 0)
@@ -272,7 +270,6 @@ vlmap_get(vlmap* m, uint64_t version, uint8_t* key, int keylength, uint8_t** val
 
 	while(vlmap_compare_nodes(node, searched) == 0) {
 		if(!vlmap_vlnode_is_present(searched, version)) {
-
 			searched = searched->next[0];
 		} else {
 			*valuelength = searched->valuelength;

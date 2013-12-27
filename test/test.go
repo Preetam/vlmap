@@ -62,7 +62,7 @@ func (m *Map) Get(key string, version uint64) (string, bool) {
 }
 
 func (m *Map) Remove(key string) {
-	C.vlmap_remove(m.vlm, 1, C.helper(C.CString(key)), C.int(len(key)))
+	C.vlmap_remove(m.vlm, C.vlmap_version(m.vlm), C.helper(C.CString(key)), C.int(len(key)))
 }
 
 func main() {
@@ -111,5 +111,19 @@ func main() {
 	}
 	if val, ok := m.Get("b", 3); val != "b" || !ok {
 		log.Fatalf("Expected `b' => `%v', got `%v'. Okay: %v", "b", val, ok)
+	}
+
+	m.VersionInc()
+	m.Remove("a")
+	m.VersionInc()
+
+	if _, ok := m.Get("a", 1); ok {
+		log.Fatalf("Got a value when I shouldn't have")
+	}
+	if _, ok := m.Get("a", 4); ok {
+		log.Fatalf("Got a value when I shouldn't have")
+	}
+	if val, ok := m.Get("a", 3); val != "a" || !ok {
+		log.Fatalf("Expected `a' => `%v', got `%v'. Okay: %v", "a", val, ok)
 	}
 }
