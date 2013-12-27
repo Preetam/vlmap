@@ -122,6 +122,10 @@ vlmap_insert_into_list(vlnode_t** rootptr, vlnode_t* node, int level) {
 		return vlmap_insert_into_list(rootptr, node, level-1);
 	}
 
+	if(vlmap_compare_nodes(node, root) == 0) {
+		root->removed = node->created;
+	}
+
 	if(vlmap_compare_nodes(node, root->next[level]) < 0) {
 		if(node->level >= level) {
 			node->next[level] = root->next[level];
