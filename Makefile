@@ -2,11 +2,11 @@ clean:
 	rm test
 
 test:
-	gcc -o valgrind_test -g vlmap.c test.c
+	gcc -o valgrind_test -g vlmap.c test.c malloc.c
 	./run_valgrind.sh
 
 install:
 	cp vlmap.h /usr/include/
-	gcc -shared -fPIC vlmap.c -o /usr/lib/libvlmap.so
+	gcc -shared -fPIC vlmap.c malloc.c -o /usr/lib/libvlmap.so
 
 .PHONY: clean test
