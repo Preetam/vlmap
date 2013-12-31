@@ -1,6 +1,6 @@
 #include "vlmap.h"
 
-int
+static inline int
 random_level() {
 	int i;
 	int j = 0;
@@ -21,17 +21,17 @@ print_node(vlnode_t* n) {
 		printf("NULL node\n");
 }
 
-vlnode_t*
+static vlnode_t*
 vlmap_real_remove_from_list(vlnode_t* root, vlnode_t* node, int level);
 
-vlnode_t*
+static vlnode_t*
 vlmap_search_in_list(vlnode_t** rootptr, vlnode_t* node, int level);
 
 vlmap*
 vlmap_create() {
-	vlmap* m = (vlmap*)calloc(1, sizeof(vlmap));
+	vlmap* m = (vlmap*)calloc(1, sizeof(vlmap)+sizeof(vlnode_t*)*20);
 	m->levels = 20;
-	m->root = (vlnode_t**)calloc(m->levels, sizeof(vlnode_t*));
+	m->root = (vlnode_t**)(m+sizeof(vlmap)*20);
 	m->version = 1;
 	return m;
 }
@@ -53,29 +53,26 @@ vlmap_destroy(vlmap* m) {
 		}
 	}
 
-	free(m->root);
 	free(m);
 }
 
 void
 vlnode_destroy(vlnode_t* n) {
 	if(n == NULL) return;
-
-	free(n->next);
-	free(n->key);
 	free(n);
 }
 
-vlnode_t*
+static vlnode_t*
 vlmap_create_node(uint64_t version, uint8_t* key, int keylength, uint8_t* value, int valuelength) {
-	vlnode_t* n = (vlnode_t*)calloc(1, sizeof(vlnode_t));
+	int level = random_level();
+	vlnode_t* n = (vlnode_t*)calloc(1, sizeof(vlnode_t)+(level+1)*sizeof(vlnode_t*)+keylength+valuelength);
 	n->keylength = keylength;
 	n->valuelength = valuelength;
 	n->created = version;
-	n->level = random_level();
+	n->level = level;
 
-	n->next = (vlnode_t**)calloc(n->level+1, sizeof(vlnode_t*));
-	n->key = malloc(keylength+valuelength);
+	n->next = (vlnode_t**)(n+sizeof(vlnode_t));
+	n->key = (uint8_t*)(n+sizeof(vlnode_t)+(level+1)*sizeof(vlnode_t*));
 	memcpy(n->key, key, keylength);
 
 	if(value != NULL) {
@@ -85,7 +82,7 @@ vlmap_create_node(uint64_t version, uint8_t* key, int keylength, uint8_t* value,
 	return n;
 }
 
-int
+static inline int
 vlmap_compare_nodes(vlnode_t* a, vlnode_t* b) {
 	if(b == NULL) {
 		return -1;
@@ -105,12 +102,12 @@ vlmap_compare_nodes(vlnode_t* a, vlnode_t* b) {
 	return cmp;
 }
 
-int
+static inline int
 vlmap_node_less_than(vlnode_t* a, vlnode_t* b) {
 	return vlmap_compare_nodes(a, b) < 0;
 }
 
-void
+static void
 vlmap_insert_into_list(vlnode_t** rootptr, vlnode_t* node, int level) {
 	if(level < 0) return;
 	vlnode_t* root = rootptr[level];
@@ -144,13 +141,13 @@ vlmap_insert_into_list(vlnode_t** rootptr, vlnode_t* node, int level) {
 	return vlmap_insert_into_list(root->next, node, level);
 }
 
-int
+static inline int
 vlmap_vlnode_is_present(vlnode_t* n, uint64_t version) {
 	return (n->created <= version &&
 	(n->removed == 0 || n->removed > version));
 }
 
-vlnode_t*
+static vlnode_t*
 vlmap_search_in_list(vlnode_t** rootptr, vlnode_t* node, int level) {
 	if(level < 0) {
 		return rootptr[0];
@@ -177,7 +174,7 @@ vlmap_search_in_list(vlnode_t** rootptr, vlnode_t* node, int level) {
 	return vlmap_search_in_list(root->next, node, level);
 }
 
-vlnode_t*
+static vlnode_t*
 vlmap_real_remove_from_list(vlnode_t* root, vlnode_t* node, int level) {
 	if(root == NULL) {
 		return NULL;
