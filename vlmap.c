@@ -1,7 +1,5 @@
 #include "vlmap.h"
 
-void* alloc = NULL;
-
 int
 random_level() {
 	int i;
