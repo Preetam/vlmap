@@ -8,8 +8,7 @@ int main() {
 	int keylength = 3;
 	uint8_t* val = "bar";
 	int vallength = 3;
-	//printf("init result: %d\n", vlmap_init("/home/preetam/git/vlmap/test/persist_test.db", 4096*4096, 1));
-	vlmap* m = vlmap_create(NULL);
+	vlmap* m = vlmap_create();
 	printf("Inserting `foo'\n");
 
 	vlmap_insert(m, vlmap_version(m), key, keylength, val, vallength);
