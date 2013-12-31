@@ -1,5 +1,7 @@
 #include "vlmap.h"
 
+void* alloc = NULL;
+
 int
 random_level() {
 	int i;
@@ -62,19 +64,26 @@ vlnode_destroy(vlnode_t* n) {
 	if(n == NULL) return;
 
 	free(n->next);
+	free(n->key);
 	free(n);
 }
 
 vlnode_t*
 vlmap_create_node(uint64_t version, uint8_t* key, int keylength, uint8_t* value, int valuelength) {
 	vlnode_t* n = (vlnode_t*)calloc(1, sizeof(vlnode_t));
-	n->key = key;
 	n->keylength = keylength;
-	n->value = value;
 	n->valuelength = valuelength;
 	n->created = version;
 	n->level = random_level();
+
 	n->next = (vlnode_t**)calloc(n->level+1, sizeof(vlnode_t*));
+	n->key = malloc(keylength+valuelength);
+	memcpy(n->key, key, keylength);
+
+	if(value != NULL) {
+		n->value = n->key+keylength;
+		memcpy(n->value, value, valuelength);
+	}
 	return n;
 }
 

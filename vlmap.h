@@ -1,10 +1,10 @@
+#ifndef VLMAP_H
+#define VLMAP_H
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-
-#ifndef VLMAP_H
-#define VLMAP_H
 
 struct vlmap_node {
 	uint8_t* key;
