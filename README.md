@@ -9,6 +9,10 @@ Since it is versioned, snapshot reads are possible.
 This is **not** guaranteed to be thread-safe, so it would be best to do writes sequentially.
 You should be able to do concurrent reads as long as the versions being used aren't cleaned.
 
+"Cleaning" basically means removing elements that have been logically deleted. This is an O(n log n)
+operation since we have to iterate through the entire list, which is O(n), and remove
+elements from the skip list, which is O(log n).
+
 License
 ----
 MIT
