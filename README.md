@@ -6,7 +6,7 @@ Keys and values are `uint8_t`s, and the keys are sorted in lexicographical order
 
 Since it is versioned, snapshot reads are possible.
 
-This is **not** guaranteed to be thread-safe, so it would be best to do writes sequentially.
+This is **not** guaranteed to be thread-safe, so it would be best to do writes serially.
 You should be able to do concurrent reads as long as the versions being used aren't cleaned.
 
 "Cleaning" basically means removing elements that have been logically deleted. This is an O(n log n)
