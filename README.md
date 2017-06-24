@@ -1,4 +1,4 @@
-vlmap [![Build Status](https://drone.io/github.com/PreetamJinka/vlmap/status.png)](https://drone.io/github.com/PreetamJinka/vlmap/latest)
+vlmap
 =====
 vlmap is a versioned, ordered map built on a skip list.
 
